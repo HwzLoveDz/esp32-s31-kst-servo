@@ -4,9 +4,9 @@
 
 把 KST CAN 舵机接到 ESP32-S31-Korvo-1 的 USB-A，在原装触摸屏上完成位置控制、轨迹演示和运行状态查看。仓库提供可移植 C 驱动、candleLight USB Host 适配器，以及五页 LVGL 机甲部件检测界面。
 
-[![Korvo 触屏、隔离 CANable 与 KST 舵机的实物联动演示](docs/images/servo-console.jpg)](docs/media/servo-showcase.mp4)
+[![Korvo 触屏、隔离 CANable 与 KST 舵机的实物联动演示](docs/images/servo-console.jpg)](docs/media/servo-showcase.mp4?raw=true)
 
-[观看 44 秒实拍演示](docs/media/servo-showcase.mp4) · [接线与板型](docs/HARDWARE.md) · [操作说明](docs/OPERATIONS.md) · [功能与验证范围](docs/FUNCTIONS.md)
+[下载 44 秒实拍演示 · MP4 / 26 MB](docs/media/servo-showcase.mp4?raw=true) · [接线与板型](docs/HARDWARE.md) · [操作说明](docs/OPERATIONS.md) · [功能与验证范围](docs/FUNCTIONS.md)
 
 ## 为什么做这个
 

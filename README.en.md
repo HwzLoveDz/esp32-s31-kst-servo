@@ -4,9 +4,9 @@
 
 Connect a KST CAN servo to the USB-A port of an ESP32-S31-Korvo-1 and use its built-in touchscreen for position control, trajectory demos, and telemetry. This repository includes portable C libraries, a candleLight USB Host transport, and a five-page LVGL interface styled as a mecha component inspection console.
 
-[![Korvo touchscreen, isolated CANable, and KST servo running together on the bench](docs/images/servo-console.jpg)](docs/media/servo-showcase.mp4)
+[![Korvo touchscreen, isolated CANable, and KST servo running together on the bench](docs/images/servo-console.jpg)](docs/media/servo-showcase.mp4?raw=true)
 
-[Watch the 44-second hardware demo](docs/media/servo-showcase.mp4) · [Hardware](docs/HARDWARE.md) · [Operation](docs/OPERATIONS.md) · [Function coverage](docs/FUNCTIONS.md)
+[Download the 44-second demo · MP4 / 26 MB](docs/media/servo-showcase.mp4?raw=true) · [Hardware](docs/HARDWARE.md) · [Operation](docs/OPERATIONS.md) · [Function coverage](docs/FUNCTIONS.md)
 
 ## Why I built it
 
