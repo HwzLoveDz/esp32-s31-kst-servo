@@ -1,0 +1,8 @@
+# Build layout for a 16 MB Korvo; inspect the actual device before flashing.
+# This preserves the offsets of the prior Korvo factory layout but is NOT
+# evidence that an attached board currently has this partition table.
+# Name,Type,SubType,Offset,Size,Flags
+nvs,data,nvs,0x9000,0x6000,
+phy_init,data,phy,0xF000,0x1000,
+factory,app,factory,0x10000,0x800000,
+coffee_pjpg,data,spiffs,0x810000,0x600000,

@@ -1,0 +1,31 @@
+{
+  "commit": "1c60f9ac589ff21402a4c69017a2323dc176b244",
+  "url": "https://github.com/eclipse-embed-cdt/eclipse-plugins/commit/1c60f9ac589ff21402a4c69017a2323dc176b244",
+  "author": "Liviu Ionescu",
+  "date": "2017-04-03T09:09:20Z",
+  "message": "templates: explicit MIT license",
+  "syscalls_license_patch": "@@ -1,8 +1,29 @@\n-//\n-// This file is part of the µOS++ III distribution.\n-// Parts of this file are from the newlib sources, issued under GPL.\n-// Copyright (c) 2014 Liviu Ionescu\n-//\n+/*\n+ * This file is part of the µOS++ distribution.\n+ *   (https://github.com/micro-os-plus)\n+ * Copyright (c) 2014 Liviu Ionescu.\n+ *\n+ * Permission is hereby granted, free of charge, to any person\n+ * obtaining a copy of this software and associated documentation\n+ * files (the \"Software\"), to deal in the Software without\n+ * restriction, including without limitation the rights to use,\n+ * copy, modify, merge, publish, distribute, sublicense, and/or\n+ * sell copies of the Software, and to permit persons to whom\n+ * the Software is furnished to do so, subject to the following\n+ * conditions:\n+ *\n+ * The above copyright notice and this permission notice shall be\n+ * included in all copies or substantial portions of the Software.\n+ *\n+ * THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES\n+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\n+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT\n+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\n+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n+ * OTHER DEALINGS IN THE SOFTWARE.\n+ */\n \n // ----------------------------------------------------------------------------\n ",
+  "code_comparisons": [
+    {
+      "local": "libs/STM32_HAL/src/newlib/_syscalls.c",
+      "upstream": "https://raw.githubusercontent.com/eclipse-embed-cdt/eclipse-plugins/1c60f9ac589ff21402a4c69017a2323dc176b244/ilg.gnuarmeclipse.templates.core/templates/common/system/src/newlib/_syscalls.c",
+      "upstream_sha256": "7556bc4151fd12b0adc5743b8e97cfbf9eb42a666f092f066e03da062f2932f8",
+      "local_sha256": "760137d8cfb19c947d150881795b458ba7f21c5101d0d10927e75e1cd174cbe7",
+      "code_equal_ignoring_comments_whitespace": true
+    },
+    {
+      "local": "libs/STM32_HAL/src/newlib/_startup.c",
+      "upstream": "https://raw.githubusercontent.com/eclipse-embed-cdt/eclipse-plugins/1c60f9ac589ff21402a4c69017a2323dc176b244/ilg.gnuarmeclipse.templates.core/templates/common/system/src/newlib/_startup.c",
+      "upstream_sha256": "82d1908d3b2838a1283ade21441e2653bb60b218ce69a0782c9e03e540036218",
+      "local_sha256": "05b540d1b322a5b2cc296c37c64da9c37d1e24b6bf540dce3fd11f88dc693e9c",
+      "code_equal_ignoring_comments_whitespace": true
+    },
+    {
+      "local": "libs/STM32_HAL/src/newlib/_sbrk.c",
+      "upstream": "https://raw.githubusercontent.com/eclipse-embed-cdt/eclipse-plugins/1c60f9ac589ff21402a4c69017a2323dc176b244/ilg.gnuarmeclipse.templates.core/templates/common/system/src/newlib/_sbrk.c",
+      "upstream_sha256": "1770f71025205702e2e1a01fb9779c1b9d2135528296679f0ea8176de5c88727",
+      "local_sha256": "ed1a7ee78deda6faaf1b3f04ec7c840c6a0812e39cef960d912c9eb96ebd8b3b",
+      "code_equal_ignoring_comments_whitespace": true
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "checked": "2026-10-10",
+  "files": [
+    {
+      "file": "STM32-HAL-BSD-3-Clause.txt",
+      "source": "../libs/STM32_HAL/src/stm32f0xx/stm32f0xx_hal.c",
+      "sha256": "1f2224c92da7007c8029134c9002bebaaa70c7e4b0a85208201e05936ba55298"
+    },
+    {
+      "file": "ARM-CMSIS-BSD-3-Clause.txt",
+      "source": "../libs/STM32_HAL/include/cmsis/core_cm0.h",
+      "sha256": "b622d5194f8e91215ea69bfcac4c106af7622ec6d3814f3ef352e6749f7202a4"
+    },
+    {
+      "file": "NEWLIB-4.4.0-DEBIAN-COPYRIGHT.txt",
+      "source": "libnewlib-dev 4.4.0.20231231-2: /usr/share/doc/libnewlib-dev/copyright",
+      "sha256": "0383bc85177c121b1ee5e00ff07f51d0cab2dd5bbe51875fdff01a91c234c3ae"
+    },
+    {
+      "file": "GCC-RUNTIME-EXCEPTION-3.1.txt",
+      "source": "https://raw.githubusercontent.com/gcc-mirror/gcc/releases/gcc-13.2.0/COPYING.RUNTIME",
+      "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74"
+    },
+    {
+      "file": "GPL-3.0.txt",
+      "source": "https://raw.githubusercontent.com/gcc-mirror/gcc/releases/gcc-13.2.0/COPYING3",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "file": "UOS-PLUS-MIT.txt",
+      "source": "https://raw.githubusercontent.com/eclipse-embed-cdt/eclipse-plugins/1c60f9ac589ff21402a4c69017a2323dc176b244/ilg.gnuarmeclipse.templates.core/templates/common/system/src/newlib/_syscalls.c",
+      "sha256": "d7d31e11fe398fa8dd48a28844da6cfcd230bc4cfb5b5d91375b0cf70ab5a7da"
+    },
+    {
+      "file": "uos-license-provenance.json",
+      "source": "https://api.github.com/repos/eclipse-embed-cdt/eclipse-plugins/commits/1c60f9ac589ff21402a4c69017a2323dc176b244",
+      "sha256": "3b997fcad51e9cabbe05169c0b5e1214795d5e5796957a31ac0a7b9e16a47b8e"
+    },
+    {
+      "file": "ST-SLA0044-Rev5.txt",
+      "source": "https://www.st.com/resource/en/license_agreement/SLA0044.txt",
+      "sha256": "205110b30587122318f644c65ed27148de4e99f86dc8f18e06103ae41a021d05"
+    },
+    {
+      "file": "UOS-TEMPLATE-DISTRIBUTION-MIT.txt",
+      "source": "https://raw.githubusercontent.com/eclipse-embed-cdt/eclipse-plugins/b8b061b0480a07c6151620925de72507065613d3/plugins/org.eclipse.embedcdt.templates.core/templates/LICENSE",
+      "sha256": "d97dded38217aec4ced51e0ebbccdd256e2dc363fc106f068b5a899d07e93478"
+    }
+  ]
+}

@@ -1,0 +1,590 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,119 +1,33 @@
+-cmake_minimum_required(VERSION 3.13)
+-project(candleLightFirmware C ASM)
++cmake_minimum_required(VERSION 3.16)
++project(zt_canable_pro_f072c8 C ASM)
+ 
+ add_compile_options(
+-    -std=gnu11
+-    -mcpu=cortex-m0 -mthumb
++    -std=gnu11 -mcpu=cortex-m0 -mthumb -Os -g3
+     -Wall -Wextra -Werror -Wno-deprecated
+-    -fmessage-length=0
+-    -fsigned-char
+-    -ffunction-sections -fdata-sections
+-    -ffreestanding
+-    -fno-move-loop-invariants
+-    -Os -g3
+-)
++    -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections
++    -ffreestanding -fno-move-loop-invariants
++    "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=zt-canable-candlelight"
++    "-fdebug-prefix-map=${CMAKE_SOURCE_DIR}=zt-canable-candlelight")
++add_link_options(
++    -mcpu=cortex-m0 -mthumb -nostartfiles --specs=nano.specs
++    -Wl,--gc-sections "-T${CMAKE_SOURCE_DIR}/ldscripts/ldscript.ld")
+ 
+-add_link_options(
+-    -mcpu=cortex-m0 -mthumb -O
+-    -Wall -Wextra -g3
+-    -nostartfiles -Xlinker --gc-sections --specs=nano.specs
+-    -T ${CMAKE_SOURCE_DIR}/ldscripts/ldscript.ld
+-)
++# Keep vendor libraries intact, but build only the F072 dependencies used below.
++add_subdirectory(libs/STM32_HAL EXCLUDE_FROM_ALL)
++add_subdirectory(libs/STM32_USB_Device_Library EXCLUDE_FROM_ALL)
+ 
+-
+-add_subdirectory(libs/STM32_HAL)
+-add_subdirectory(libs/STM32_USB_Device_Library)
+-
+-set(
+-    SOURCE_FILES
+-        include/config.h
+-
+-        include/gs_usb.h
+-        include/usbd_desc.h src/usbd_desc.c
+-        include/usbd_gs_can.h src/usbd_gs_can.c
+-        src/usbd_conf.c
+-
+-        include/can.h src/can.c
+-        include/dfu.h src/dfu.c
+-        include/flash.h src/flash.c
+-        include/gpio.h src/gpio.c
+-        include/led.h src/led.c
+-        include/queue.h src/queue.c
+-        include/timer.h src/timer.c
+-        include/util.h src/util.c
+-
+-        src/main.c
+-        src/interrupts.c
+-)
+-
+-
+-####### some helpers to generate targets
+-function(make_bin_file target)
+-    add_custom_command(
+-        TARGET ${target} POST_BUILD
+-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+-        COMMAND ${CMAKE_OBJCOPY} -O binary ${target} ${target}.bin
+-    )
+-endfunction()
+-
+-function(show_object_size target)
+-    string(REPLACE "objcopy" "size" CMAKE_OBJSIZE "${CMAKE_OBJCOPY}")
+-    add_custom_command(
+-        TARGET ${target} POST_BUILD
+-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+-        COMMAND ${CMAKE_OBJSIZE} ${target}
+-    )
+-endfunction()
+-
+-function(add_flash_target target)
+-	add_custom_target(
+-		flash-${target} dfu-util -d 1d50:606f -a 0 -R -s 0x08000000 -D ${target}.bin
+-	)
+-endfunction()
+-
+-######### commands for adding each target have a lot in common: make helper func.
+-# Split into two categories, F042-based and F072-based.
+-
+-function(add_f042_target TGTNAME)
+-	add_executable(${TGTNAME}_fw ${SOURCE_FILES})
+-    target_include_directories(${TGTNAME}_fw PRIVATE include/)
+-    target_compile_definitions(${TGTNAME}_fw PRIVATE BOARD=BOARD_${TGTNAME})
+-    target_link_libraries(${TGTNAME}_fw PRIVATE STM32_HAL_STM32F042x6 STM32_USB_Device_Library_STM32F042x6)
+-    make_bin_file(${TGTNAME}_fw)
+-    show_object_size(${TGTNAME}_fw)
+-    add_flash_target(${TGTNAME}_fw)
+-endfunction()
+-
+-function(add_f072_target TGTNAME)
+-	add_executable(${TGTNAME}_fw ${SOURCE_FILES})
+-    target_include_directories(${TGTNAME}_fw PRIVATE include/)
+-    target_compile_definitions(${TGTNAME}_fw PRIVATE BOARD=BOARD_${TGTNAME})
+-    target_link_libraries(${TGTNAME}_fw PRIVATE STM32_HAL_STM32F072xB STM32_USB_Device_Library_STM32F072xB)
+-    make_bin_file(${TGTNAME}_fw)
+-    show_object_size(${TGTNAME}_fw)
+-    add_flash_target(${TGTNAME}_fw)
+-endfunction()
+-
+-########## generate list of targets.
+-# the "_fw" part is appended automatically
+-set(TGT042_LIST "cantact" "canalyze" "canable" "usb2can")
+-set(TGT072_LIST "candleLight")
+-
+-
+-foreach (TGTNAME IN LISTS TGT042_LIST)
+-	option(BUILD_${TGTNAME} "Build firmware for \"${TGTNAME}\" (default=yes)" ON)
+-	if (BUILD_${TGTNAME})
+-		add_f042_target(${TGTNAME})
+-	endif()
+-endforeach()
+-
+-foreach (TGTNAME IN LISTS TGT072_LIST)
+-	option(BUILD_${TGTNAME} "Build firmware for \"${TGTNAME}\" (default=yes)" ON)
+-	if (BUILD_${TGTNAME})
+-		add_f072_target(${TGTNAME})
+-	endif()
+-endforeach()
+-
+-message("*******************")
+-message("You may now:\n\t-compile all targets ('make')\n\t-compile a single target (e.g. 'make cantact_fw'")
+-message("\t-flash a device (e.g. 'make flash-cantact_fw'")
++set(FW zt-canable-pro-f072c8-candlelight)
++add_executable(${FW}.elf
++    src/usbd_desc.c src/usbd_gs_can.c src/usbd_conf.c
++    src/can.c src/dfu.c src/flash.c src/gpio.c src/led.c src/queue.c
++    src/timer.c src/util.c src/main.c src/interrupts.c)
++target_include_directories(${FW}.elf PRIVATE include)
++target_compile_definitions(${FW}.elf PRIVATE BOARD=BOARD_candleLight)
++target_link_libraries(${FW}.elf PRIVATE
++    STM32_HAL_STM32F072xB STM32_USB_Device_Library_STM32F072xB)
++target_link_options(${FW}.elf PRIVATE "-Wl,-Map=${CMAKE_BINARY_DIR}/${FW}.map")
++add_custom_command(TARGET ${FW}.elf POST_BUILD
++    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${FW}.elf> ${FW}.bin
++    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${FW}.elf>
++    WORKING_DIRECTORY ${CMAKE_BINARY_DIR} VERBATIM)
++# Deliberately no programming/DFU targets: this project only builds artifacts.
+--- a/include/config.h
++++ b/include/config.h
+@@ -41,11 +41,10 @@
+ #define BOARD_canalyze     5
+ 
+ #if BOARD == BOARD_candleLight
+-	#define USBD_PRODUCT_STRING_FS		(uint8_t*) "candleLight USB to CAN adapter"
+-	#define USBD_MANUFACTURER_STRING	(uint8_t*) "bytewerk"
++	#define USBD_PRODUCT_STRING_FS		(uint8_t*) "ZT-CANable Pro F072C8 candleLight"
++	#define USBD_MANUFACTURER_STRING	(uint8_t*) "ZT-CANable compatible"
+ 	#define DFU_INTERFACE_STRING_FS		(uint8_t*) "candleLight firmware upgrade interface"
+-	#define CAN_S_Pin GPIO_PIN_13
+-	#define CAN_S_GPIO_Port GPIOC
++	/* ZT Pro V1.0: ADM3053 RS is tied to GND; PC13 is not a CAN enable. */
+ 
+ 	#define LED1_Pin GPIO_PIN_1				//LED1 as TX 
+ 	#define LED1_Mode GPIO_MODE_OUTPUT_OD
+--- a/include/usbd_gs_can.h
++++ b/include/usbd_gs_can.h
+@@ -45,7 +45,10 @@
+ 
+ extern USBD_ClassTypeDef USBD_GS_CAN;
+ 
+-uint8_t USBD_GS_CAN_Init(USBD_HandleTypeDef *pdev, queue_t *q_frame_pool, queue_t *q_from_host, led_data_t *leds);
++uint8_t USBD_GS_CAN_Init(USBD_HandleTypeDef *pdev, queue_t *q_frame_pool, queue_t *q_from_host, queue_t *q_to_host, led_data_t *leds);
++/* Stop CAN, abort mailboxes and discard queued traffic. No implicit restart. */
++void USBD_GS_CAN_StopSession(USBD_HandleTypeDef *pdev);
++bool USBD_GS_CAN_CanActive(USBD_HandleTypeDef *pdev);
+ void USBD_GS_CAN_SetChannel(USBD_HandleTypeDef *pdev, uint8_t channel, can_data_t* handle);
+ void USBD_GS_CAN_SuspendCallback(USBD_HandleTypeDef  *pdev);
+ bool USBD_GS_CAN_TxReady(USBD_HandleTypeDef *pdev);
+--- a/src/can.c
++++ b/src/can.c
+@@ -52,7 +52,8 @@
+ 	  && (phase_seg2>0) && (phase_seg2<=8)
+ 	  && (sjw>0) && (sjw<=4)
+ 	) {
+-		hcan->brp = brp & 0x3FF;
++		/* Store the divisor, not the encoded register field (1024 must not wrap). */
++		hcan->brp = brp;
+ 		hcan->phase_seg1 = phase_seg1;
+ 		hcan->phase_seg2 = phase_seg2;
+ 		hcan->sjw = sjw;
+@@ -67,7 +68,7 @@
+ 	CAN_TypeDef *can = hcan->instance;
+ 
+ 	uint32_t mcr = CAN_MCR_INRQ
+-				 | CAN_MCR_ABOM
++				 | (one_shot ? 0 : CAN_MCR_ABOM)
+ 				 | CAN_MCR_TXFP
+ 				 | (one_shot ? CAN_MCR_NART : 0);
+ 
+@@ -109,6 +110,9 @@
+ void can_disable(can_data_t *hcan)
+ {
+ 	CAN_TypeDef *can = hcan->instance;
++	/* Abort all pending TX requests before entering STOP. A frame already on
++	 * the wire cannot be recalled; none remains pending for a later START. */
++	can->TSR = CAN_TSR_ABRQ0 | CAN_TSR_ABRQ1 | CAN_TSR_ABRQ2;
+ 	can->MCR |= CAN_MCR_INRQ ; // send can controller into initialization mode
+ }
+ 
+@@ -178,6 +182,8 @@
+ 
+ bool can_send(can_data_t *hcan, struct gs_host_frame *frame)
+ {
++	if (!can_is_enabled(hcan) || (hcan->instance->ESR & CAN_ESR_BOFF))
++		return false;
+ 	CAN_TxMailBox_TypeDef *mb = can_find_free_mailbox(hcan);
+ 	if (mb != 0) {
+ 
+@@ -228,6 +234,9 @@
+ {
+ 	frame->echo_id = 0xFFFFFFFF;
+ 	frame->can_id  = CAN_ERR_FLAG | CAN_ERR_CRTL;
++	frame->channel = 0;
++	frame->flags = 0;
++	frame->reserved = 0;
+ 	frame->can_dlc = CAN_ERR_DLC;
+ 	frame->data[0] = CAN_ERR_LOSTARB_UNSPEC;
+ 	frame->data[1] = CAN_ERR_CRTL_UNSPEC;
+--- a/src/main.c
++++ b/src/main.c
+@@ -88,7 +88,7 @@
+ 
+ 	USBD_Init(&hUSB, &FS_Desc, DEVICE_FS);
+ 	USBD_RegisterClass(&hUSB, &USBD_GS_CAN);
+-	USBD_GS_CAN_Init(&hUSB, q_frame_pool, q_from_host, &hLED);
++	USBD_GS_CAN_Init(&hUSB, q_frame_pool, q_from_host, q_to_host, &hLED);
+ 	USBD_GS_CAN_SetChannel(&hUSB, 0, &hCAN);
+ 	USBD_Start(&hUSB);
+ 
+@@ -97,16 +97,25 @@
+ #endif
+ 
+ 	while (1) {
++		/* Pop/check/TX and pool ownership are one short critical section. A USB
++		 * RESET/SUSPEND IRQ cannot clear a queue then have a popped old frame
++		 * submitted when main resumes. No waiting/retry loops occur inside. */
++		int primask = disable_irq();
++		uint32_t can_err = can_get_error_status(&hCAN);
++		if ((can_err & CAN_ESR_BOFF) && USBD_GS_CAN_CanActive(&hUSB))
++			USBD_GS_CAN_StopSession(&hUSB);
+ 		struct gs_host_frame *frame = queue_pop_front(q_from_host);
+ 		if (frame != 0) { // send can message from host
+-			if (can_send(&hCAN, frame)) {
++			if (USBD_GS_CAN_CanActive(&hUSB) && can_send(&hCAN, frame)) {
+ 				// Echo sent frame back to host
+ 				frame->timestamp_us = timer_get();
+ 				send_to_host_or_enqueue(frame);
+ 
+ 				led_indicate_trx(&hLED, led_2);
+ 			} else {
+-				queue_push_front(q_from_host, frame); // retry later
++				/* Never defer actuator commands indefinitely when mailboxes are busy.
++				 * No echo is emitted; the host detects its bounded echo timeout. */
++				queue_push_back(q_frame_pool, frame);
+ 			}
+ 		}
+ 
+@@ -114,7 +123,7 @@
+ 			send_to_host();
+ 		}
+ 
+-		if (can_is_rx_pending(&hCAN)) {
++		if (USBD_GS_CAN_CanActive(&hUSB) && can_is_rx_pending(&hCAN)) {
+ 			struct gs_host_frame *frame = queue_pop_front(q_frame_pool);
+ 			if (frame != 0)
+ 			{
+@@ -138,7 +147,6 @@
+ 			}
+ 		}
+ 
+-		uint32_t can_err = can_get_error_status(&hCAN);
+ 		if (can_err != last_can_error_status) {
+ 			struct gs_host_frame *frame = queue_pop_front(q_frame_pool);
+ 			if (frame != 0) {
+@@ -147,12 +155,16 @@
+ 					send_to_host_or_enqueue(frame);
+ 					last_can_error_status = can_err;
+ 				} else {
++					/* Remember recovery too; otherwise an identical later bus-off
++					 * would be suppressed after MODE_START clears the controller. */
++					last_can_error_status = can_err;
+ 					queue_push_back(q_frame_pool, frame);
+ 				}
+ 
+ 			}
+ 		}
+ 
++		enable_irq(primask);
+ 		led_update(&hLED);
+ 
+ 		if (USBD_GS_CAN_DfuDetachRequested(&hUSB)) {
+--- a/src/usbd_gs_can.c
++++ b/src/usbd_gs_can.c
+@@ -47,8 +47,13 @@
+ 	struct gs_host_config host_config;
+ 	queue_t *q_frame_pool;
+ 	queue_t *q_from_host;
+-
+-	struct gs_host_frame *from_host_buf;
++	queue_t *q_to_host;
++	/* USB owns these fixed buffers; frame-pool entries never remain in an EP.
++	 * A full endpoint packet fits even if a host submits an invalid length. */
++	uint8_t from_host_buf[CAN_DATA_MAX_PACKET_SIZE];
++	uint8_t to_host_buf[CAN_DATA_MAX_PACKET_SIZE];
++	volatile bool configured;
++	volatile bool can_running;
+ 
+ 	can_data_t *channels[NUM_CAN_CHANNEL];
+ 
+@@ -263,7 +268,7 @@
+ 	0, // reserved 2
+ 	0, // reserved 3
+ 	0, // interface count (0=1, 1=2..)
+-	2, // software version
++	3, // ZT lifecycle/ONE_SHOT fixes; original vendor source used version 2
+ 	1  // hardware version
+ };
+ 
+@@ -271,6 +276,7 @@
+ static const struct gs_device_bt_const USBD_GS_CAN_btconst = {
+ 	GS_CAN_FEATURE_LISTEN_ONLY  // supported features
+ 	| GS_CAN_FEATURE_LOOP_BACK
++	| GS_CAN_FEATURE_ONE_SHOT // Implemented below via can_enable() -> CAN_MCR_NART.
+ 	| GS_CAN_FEATURE_HW_TIMESTAMP
+ 	| GS_CAN_FEATURE_IDENTIFY
+ 	| GS_CAN_FEATURE_USER_ID
+@@ -286,7 +292,7 @@
+ 	1, // brp increment;
+ };
+ 
+-uint8_t USBD_GS_CAN_Init(USBD_HandleTypeDef *pdev, queue_t *q_frame_pool, queue_t *q_from_host, led_data_t *leds)
++uint8_t USBD_GS_CAN_Init(USBD_HandleTypeDef *pdev, queue_t *q_frame_pool, queue_t *q_from_host, queue_t *q_to_host, led_data_t *leds)
+ {
+ 	uint8_t ret = USBD_FAIL;
+ 	USBD_GS_CAN_HandleTypeDef *hcan = calloc(1, sizeof(USBD_GS_CAN_HandleTypeDef));
+@@ -294,9 +300,9 @@
+ 	if(hcan != 0) {
+ 		hcan->q_frame_pool = q_frame_pool;
+ 		hcan->q_from_host = q_from_host;
++		hcan->q_to_host = q_to_host;
+ 		hcan->leds = leds;
+ 		pdev->pClassData = hcan;
+-		hcan->from_host_buf = NULL;
+ 
+ 		ret = USBD_OK;
+ 	} else {
+@@ -306,6 +312,30 @@
+ 	return ret;
+ }
+ 
++void USBD_GS_CAN_StopSession(USBD_HandleTypeDef *pdev)
++{
++	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
++	if (!hcan) return;
++	int primask = disable_irq();
++	hcan->can_running = false;
++	for (unsigned i = 0; i < NUM_CAN_CHANNEL; ++i)
++		if (hcan->channels[i]) can_disable(hcan->channels[i]);
++	void *frame;
++	while ((frame = queue_pop_front_i(hcan->q_from_host)) != NULL)
++		queue_push_back_i(hcan->q_frame_pool, frame);
++	while ((frame = queue_pop_front_i(hcan->q_to_host)) != NULL)
++		queue_push_back_i(hcan->q_frame_pool, frame);
++	if (hcan->leds) led_set_mode(hcan->leds, led_mode_off);
++	enable_irq(primask);
++}
++
++bool USBD_GS_CAN_CanActive(USBD_HandleTypeDef *pdev)
++{
++	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
++	return hcan && hcan->configured && hcan->can_running &&
++	       pdev->dev_state == USBD_STATE_CONFIGURED;
++}
++
+ static uint8_t USBD_GS_CAN_Start(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
+ {
+ 	UNUSED(cfgidx);
+@@ -313,9 +343,18 @@
+ 
+ 	if (pdev->pClassData) {
+ 		USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData;
++		USBD_GS_CAN_StopSession(pdev);
++		if (hcan->configured) {
++			USBD_LL_CloseEP(pdev, GSUSB_ENDPOINT_IN);
++			USBD_LL_CloseEP(pdev, GSUSB_ENDPOINT_OUT);
++		}
+ 		USBD_LL_OpenEP(pdev, GSUSB_ENDPOINT_IN, USBD_EP_TYPE_BULK, CAN_DATA_MAX_PACKET_SIZE);
+ 		USBD_LL_OpenEP(pdev, GSUSB_ENDPOINT_OUT, USBD_EP_TYPE_BULK, CAN_DATA_MAX_PACKET_SIZE);
+-		hcan->from_host_buf = queue_pop_front(hcan->q_frame_pool);
++		hcan->configured = true;
++		hcan->TxState = 0;
++		hcan->timestamps_enabled = false;
++		hcan->pad_pkts_to_max_pkt_size = false;
++		hcan->last_setup_request.bRequest = 0xff;
+ 		USBD_GS_CAN_PrepareReceive(pdev);
+ 		ret = USBD_OK;
+ 	} else {
+@@ -328,9 +367,13 @@
+ static uint8_t USBD_GS_CAN_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
+ {
+ 	UNUSED(cfgidx);
++	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
++	USBD_GS_CAN_StopSession(pdev);
++	if (hcan) hcan->configured = false;
+ 
+ 	USBD_LL_CloseEP(pdev, GSUSB_ENDPOINT_IN);
+ 	USBD_LL_CloseEP(pdev, GSUSB_ENDPOINT_OUT);
++	if (hcan) hcan->TxState = 0;
+ 
+ 	return USBD_OK;
+ }
+@@ -352,18 +395,8 @@
+ // Handle USB suspend event
+ void USBD_GS_CAN_SuspendCallback(USBD_HandleTypeDef  *pdev)
+ {
+-	// Disable CAN and go off bus on USB suspend
+-	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*) pdev->pClassData;
+-
+-	if(hcan != NULL)
+-	{
+-		for(uint32_t i=0; i<NUM_CAN_CHANNEL; i++)
+-			if(hcan->channels[i] != NULL)
+-				can_disable(hcan->channels[i]);
+-	}
+-
+-	if(hcan != NULL && hcan->leds != NULL)
+-		led_set_mode(hcan->leds, led_mode_off);
++	/* Resume does not restart CAN; a new explicit MODE_START is required. */
++	USBD_GS_CAN_StopSession(pdev);
+ }
+ 
+ 
+@@ -416,10 +449,11 @@
+ 
+ 				if (mode->mode == GS_CAN_MODE_RESET) {
+ 
+-					can_disable(ch);
+-					led_set_mode(hcan->leds, led_mode_off);
++					USBD_GS_CAN_StopSession(pdev);
+ 
+ 				} else if (mode->mode == GS_CAN_MODE_START) {
++					/* Every START creates a fresh CAN session, including repeated START. */
++					USBD_GS_CAN_StopSession(pdev);
+ 
+ 					hcan->timestamps_enabled = (mode->flags & GS_CAN_MODE_HW_TIMESTAMP) != 0;
+ 					hcan->pad_pkts_to_max_pkt_size = (mode->flags & GS_CAN_MODE_PAD_PKTS_TO_MAX_PKT_SIZE) != 0;
+@@ -430,6 +464,7 @@
+ 						(mode->flags & GS_CAN_MODE_ONE_SHOT) != 0
+ 						// triple sampling not supported on bxCAN
+ 					);
++					hcan->can_running = true;
+ 
+ 					led_set_mode(hcan->leds, led_mode_normal);
+ 				}
+@@ -463,6 +498,7 @@
+ 	switch (req->bRequest) {
+ 
+ 		case 0: // DETACH request
++			USBD_GS_CAN_StopSession(pdev);
+ 			hcan->dfu_detach_requested = true;
+ 			break;
+ 
+@@ -628,13 +664,20 @@
+ 	hcan->out_requests++;
+ 
+ 	uint32_t rxlen = USBD_LL_GetRxDataSize(pdev, epnum);
+-	if (rxlen >= (sizeof(struct gs_host_frame)-4)) {
++	const struct gs_host_frame *incoming = (const struct gs_host_frame*)hcan->from_host_buf;
++	const bool valid = (rxlen == 20 || rxlen == 24) &&
++		incoming->channel == 0 && incoming->can_dlc <= 8 &&
++		incoming->flags == 0 && incoming->reserved == 0 &&
++		incoming->echo_id != 0xffffffff && !(incoming->can_id & CAN_ERR_FLAG) &&
++		((incoming->can_id & CAN_EFF_FLAG) ||
++		 ((incoming->can_id & ~(CAN_RTR_FLAG | 0x7ffU)) == 0));
++	if (valid && USBD_GS_CAN_CanActive(pdev)) {
+ 		struct gs_host_frame *frame = queue_pop_front_i(hcan->q_frame_pool);
+ 		if(frame){
+-			queue_push_back_i(hcan->q_from_host, hcan->from_host_buf);
+-			hcan->from_host_buf = frame;
+-
+-			retval = USBD_OK;
++			memcpy(frame, hcan->from_host_buf, 20);
++			frame->timestamp_us = 0;
++			if (queue_push_back_i(hcan->q_from_host, frame)) retval = USBD_OK;
++			else queue_push_back_i(hcan->q_frame_pool, frame);
+ 		}
+ 		else{
+ 			// Discard current packet from host if we have no place
+@@ -654,21 +697,30 @@
+ inline uint8_t USBD_GS_CAN_PrepareReceive(USBD_HandleTypeDef *pdev)
+ {
+ 	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
+-	return USBD_LL_PrepareReceive(pdev, GSUSB_ENDPOINT_OUT, (uint8_t*)hcan->from_host_buf, sizeof(*hcan->from_host_buf));
++	if (!hcan || !hcan->configured) return USBD_FAIL;
++	return USBD_LL_PrepareReceive(pdev, GSUSB_ENDPOINT_OUT, hcan->from_host_buf, sizeof(hcan->from_host_buf));
+ }
+ 
+ bool USBD_GS_CAN_TxReady(USBD_HandleTypeDef *pdev)
+ {
+ 	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
+-	return hcan->TxState == 0;
++	return hcan && hcan->configured && hcan->TxState == 0 &&
++	       pdev->dev_state == USBD_STATE_CONFIGURED;
+ }
+ 
+ uint8_t USBD_GS_CAN_Transmit(USBD_HandleTypeDef *pdev, uint8_t *buf, uint16_t len)
+ {
+ 	USBD_GS_CAN_HandleTypeDef *hcan = (USBD_GS_CAN_HandleTypeDef*)pdev->pClassData;
++	if (!hcan || !hcan->configured || pdev->dev_state != USBD_STATE_CONFIGURED ||
++	    len > sizeof(hcan->to_host_buf)) return USBD_FAIL;
+ 	if (hcan->TxState == 0) {
++		/* PCD transfer may finish after the caller returns. Keep its bytes alive. */
++		memcpy(hcan->to_host_buf, buf, len);
+ 		hcan->TxState = 1;
+-		USBD_LL_Transmit(pdev, GSUSB_ENDPOINT_IN, buf, len);
++		if (USBD_LL_Transmit(pdev, GSUSB_ENDPOINT_IN, hcan->to_host_buf, len) != USBD_OK) {
++			hcan->TxState = 0;
++			return USBD_FAIL;
++		}
+ 		return USBD_OK;
+ 	} else {
+ 		return USBD_BUSY;
+--- a/src/util.c
++++ b/src/util.c
+@@ -29,13 +29,13 @@
+ inline int disable_irq(void) {
+ 	int primask;
+ 	asm volatile("mrs %0, PRIMASK\n"
+-				"cpsid i\n" : "=r"(primask));
++				"cpsid i\n" : "=r"(primask) : : "memory");
+ 	return primask & 1;
+ }
+ 
+ inline void enable_irq(int primask) {
+ 	if (!primask)
+-		asm volatile("cpsie i\n");
++		asm volatile("cpsie i\n" : : : "memory");
+ }
+ 
+ void hex32(char *out, uint32_t val)
+--- a/ldscripts/ldscript.ld
++++ b/ldscripts/ldscript.ld
+@@ -1,7 +1,10 @@
+ MEMORY
+ {
+-  FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 32K
+-  RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 6K
++  /* STM32F072C8: 64 KiB total flash, 16 KiB RAM.
++   * Reserve the final 2 KiB erase page for GS_USB SET_USER_ID persistence. */
++  FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 62K
++  USER_DATA (r) : ORIGIN = 0x0800F800, LENGTH = 2K
++  RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 16K
+ }
+ 
+ /*
+@@ -52,6 +55,10 @@
+ 
+ SECTIONS
+ {
++    .user_data : ALIGN(4)
++    {
++        KEEP(*(.user_data))
++    } >USER_DATA
+     /*
+      * For Cortex-M devices, the beginning of the startup code is stored in
+      * the .isr_vector section, which goes to FLASH. 
+@@ -353,5 +360,9 @@
+     .debug_weaknames 0 : { *(.debug_weaknames) }
+     .debug_funcnames 0 : { *(.debug_funcnames) }
+     .debug_typenames 0 : { *(.debug_typenames) }
+-    .debug_varnames  0 : { *(.debug_varnames) }    
++    .debug_varnames  0 : { *(.debug_varnames) }
++
++    ASSERT(ADDR(.user_data) == 0x0800F800, "User data erase page moved")
++    ASSERT(SIZEOF(.user_data) <= 2048, "User data exceeds erase page")
++    ASSERT(_end_noinit + __Main_Stack_Size <= __stack, "RAM leaves no main stack")
+ }

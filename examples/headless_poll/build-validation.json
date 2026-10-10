@@ -1,0 +1,22 @@
+{
+  "validated_date": "2026-10-09",
+  "project": "kst_headless_poll",
+  "target": "esp32s31",
+  "idf_version": "6.2.0",
+  "idf_commit": "c712a0dde385d659a1470a136251980d31a70bc1",
+  "build_command": "Invoke-S31Idf -B build --preview build",
+  "build_exit_code": 0,
+  "build_log": "build-20261009.log",
+  "image_info_log": "image-info-20261009.log",
+  "firmware": "build/kst_headless_poll.bin",
+  "firmware_size_bytes": 239536,
+  "firmware_sha256": "AE64B91C7E61099B6799F648B74E97665554ADE53B7206A43C2FB8814F192312",
+  "source_main_sha256": "EC4252E738B9FB907E9B2614C17AF013C09F562B347B154C18F33F2285BA7370",
+  "chip_id": 32,
+  "image_checksum_valid": true,
+  "image_validation_hash_valid": true,
+  "app_partition_size_bytes": 1048576,
+  "hardware_flashed": false,
+  "hardware_validated": false,
+  "build_warnings": "SDK private include dependency warnings in esp_wifi/wpa_supplicant; no example source compile failures."
+}

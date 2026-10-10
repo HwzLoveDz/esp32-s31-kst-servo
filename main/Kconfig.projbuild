@@ -1,0 +1,67 @@
+menu "KST CAN servo / Korvo FUI"
+choice KST_TRANSPORT
+    prompt "CAN transport"
+    default KST_TRANSPORT_USB_GS
+config KST_TRANSPORT_USB_GS
+    bool "candleLight / gs_usb on Korvo USB-A"
+config KST_TRANSPORT_TWAI
+    bool "Native TWAI with external CAN transceiver"
+endchoice
+config KST_TX_GPIO
+    int "TWAI TX GPIO (camera connector J4 pin 19)"
+    range 0 60
+    default 46
+    depends on KST_TRANSPORT_TWAI
+config KST_RX_GPIO
+    int "TWAI RX GPIO (camera connector J4 pin 21)"
+    range 0 60
+    default 47
+    depends on KST_TRANSPORT_TWAI
+config KST_NODE_ID
+    int "Initial servo node (decimal; 37 = 0x25)"
+    range 1 127
+    default 37
+config KST_BITRATE
+    int "Initial CAN bitrate"
+    default 500000
+config KST_TIMEOUT_MS
+    int "Request / transport timeout (ms)"
+    range 50 1000
+    default 200
+config KST_STALE_MS
+    int "Disarm motion when position or status is stale (ms)"
+    range 500 5000
+    default 800
+config KST_DIAGNOSTIC_LOG
+    bool "Print readback and transport diagnostics every 2 seconds"
+    default y
+    help
+        Print actual readback validity, raw units and transport counters to
+        the serial console from the CAN worker. Does not issue extra CAN
+        requests or change the FUI operation log. Disable for quieter output.
+config KST_DISCOVER_ON_START
+    bool "Probe extended-CAN nodes 1..127 once after USB startup"
+    depends on KST_TRANSPORT_USB_GS
+    default n
+    help
+        If initial readbacks receive no valid reply, send one broadcast READ
+        NODE and log raw replies for 500 ms, then read the version from each
+        unicast node with a 200 ms timeout. Report matches on the serial console
+        without changing the selected node or servo settings.
+        Motion is disarmed and queued UI commands are invalidated. PAUSE or a
+        USB connection change aborts the scan. Only extended read requests.
+config KST_PROBE_360_ON_START
+    bool "TEMPORARY: probe node 5 firmware 3.66 limit acceptance once"
+    depends on KST_TRANSPORT_USB_GS
+    default n
+    help
+        Diagnostic only. After the first USB-ready startup readback, require
+        node 5, firmware 3.66, complete fresh telemetry and an in-range position.
+        Try +180 degrees once, restore and verify the original positive limit,
+        then try -180 degrees only if the positive probe and restore succeeded.
+        No position, center, feature or SAVE commands. Missing prerequisites
+        skip the probe permanently for this boot. PAUSE cancels further trials;
+        necessary restoration continues only on the same USB connection.
+        Unverified restoration latches a ban on motion and parameter writes.
+        Disable after diagnosis. Acceptance does not prove mechanical travel.
+endmenu
